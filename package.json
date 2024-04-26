@@ -1,0 +1,35 @@
+{
+  "name": "s3fsync",
+  "version": "0.1.0",
+  "description": "About",
+  "main": "bin/index.js",
+  "type": "module",
+  "bin": {
+    "s3fsync": "./bin/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/profmancusoa/s3fsync.git"
+  },
+  "keywords": [
+    "AWS",
+    "S3",
+    "file",
+    "synch"
+  ],
+  "author": "Antonio \"profmancusoa\" Mancuso",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/profmancusoa/s3fsync/issues"
+  },
+  "homepage": "https://github.com/profmancusoa/s3fsync#readme",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.556.0",
+    "commander": "^12.0.0",
+    "md5-file": "^5.0.0",
+    "split-file": "^2.3.0"
+  }
+}
