@@ -1,5 +1,6 @@
 import { S3Client, HeadBucketCommand, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3"; 
 import { file2chunkDir, readFile } from "./file.js";
+import { log } from './helper.js';
 
 const client = new S3Client();
 
@@ -58,6 +59,7 @@ export const deleteObject = async (bucket, file) => {
 }
 
 export const getManifest = async (bucket, file) => {
+    log('yellow', '- Getting manifest file from S3\n');
     try {
         let manifestFile = `${file2chunkDir(file)}/manifest.json`;
         let manifestRaw = await readObject(bucket, manifestFile);

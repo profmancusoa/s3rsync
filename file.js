@@ -1,20 +1,23 @@
 import fs from 'fs';
 import splitFile from 'split-file';
 import md5File from 'md5-file';
+import { log, spinner, yellow } from './helper.js';
 
 const dumpManifest = (fPath, manifest) => {
     try {
         fs.writeFileSync(fPath, JSON.stringify(manifest, null, 2));
         return JSON.stringify(manifest, null, 2);
     } catch(e) {
-        console.log('ERROR: Cannot write chunk manifest...');
+        log('red', 'ERROR: Cannot write chunk manifest...');
         return null;
     }
 }
 
 const buildChunkManifest = async (chunkList) => {
-    console.log('- Building chunk manifest file...');
+    let progress = spinner(yellow('Building chunk manifest file...   '));
+    
     try {
+        progress.start();
         let chunkManifest = [];
         let destDir = chunkList[0].split('/')[0];
 
@@ -27,9 +30,12 @@ const buildChunkManifest = async (chunkList) => {
         });
         
         //dump manifest
-        return dumpManifest(`${destDir}/manifest.json`, chunkManifest);
+        let manifestFile = dumpManifest(`${destDir}/manifest.json`, chunkManifest); 
+        progress.stop();
+
+        return manifestFile;
     } catch(e) {
-        console.log('ERROR: Cannot generate chunk manifest...');
+        log('red', 'ERROR: Cannot generate chunk manifest...');
         return null;
     }
 }
@@ -51,20 +57,25 @@ export const chunkFile = async (file, cs) => {
     let fSize = fs.statSync(file).size;
     let chunkSize = Math.max(Math.min(cs, fSize), 4096);
     let chunkDir = file2chunkDir(file);
+    let progress = spinner(yellow('Chunking file...   '));
 
     try {
         //create chinks dir and chink file
-        console.log(`- Chunking file into ${chunkSize} byte chunks...`);
+        log('yellow', `\n\n- Chunking file into ${chunkSize} byte chunks...\n\n`);
+        progress.start();
+        
         if(!fileExists(chunkDir))
             fs.mkdirSync(chunkDir);
         let chunkList = await splitFile.splitFileBySize(file, chunkSize, chunkDir);
         
         //build chink Manifest file
-        return await buildChunkManifest(chunkList);
+        // return await buildChunkManifest(chunkList);
+        let manifestFile = await buildChunkManifest(chunkList);
 
-        // return chunkList;
+        progress.stop();
+        return manifestFile;
     } catch(e) {
-        console.log('ERROR: Cannot chunk file...');
+        log('red', 'ERROR: Cannot chunk file...');
         process.exit(1);
     }
 }
@@ -73,7 +84,7 @@ export const delChunks = (file) => {
     try {
         fs.rmSync(file2chunkDir(file), {recursive: true});
     } catch(e) {
-        console.log('WARNING: Cannot remove chunks dir...');
+        log('red', 'WARNING: Cannot remove chunks dir...');
     }
 }
 

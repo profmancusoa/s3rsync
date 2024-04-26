@@ -1,7 +1,23 @@
 import { fileExists } from './file.js';
 import { bucketExists } from './s3.js';
+import { yellow, log } from './helper.js';
+import boxen from 'boxen';
 
-const USAGE = '\nUsage: s3fsync sync -cs 1048576 file://bigFile s3://big-bucket';
+// const USAGE = '\nUsage: s3fsync sync -cs 1048576 file://bigFile s3://big-bucket';
+const USAGE_STR = `
+s3fsync sync -cs 1048576 file://bigFile s3://big-bucket
+\ns3fsync sync -cs 1048576 s3://big-bucket file://bigFile 
+\nfile and bucket must exists`;
+
+const USAGE = boxen(USAGE_STR, {
+                  margin: 1,
+                  padding: 1,
+                  borderColor: "yellowBright",
+                  dimBorder: false,
+                  borderStyle: "round",
+                  title: 'Usage',
+                  titleAlignment: 'center'
+                });
 
 const paramType = (param) => {
     return param.startsWith('s3://')
@@ -30,22 +46,24 @@ const paramsExists = async (src, dst) => {
         );
 }
 
+const showUsage = () => {
+    log('red', '...ERROR');
+    log('cyan', `\n\n${USAGE}\n`)
+    process.exit(1);
+}
+
 export const validateParameters = async (src, dst, size) => {
-    console.log("- Validating parameters...");
-    if(!isParamsValid(src, dst, size)) {
-        console.log("Error in validating parameters");
-        console.log(USAGE)
-        process.exit(1);
-    }
+    log('yellow', '\n- Validating parameters...');
+    if(!isParamsValid(src, dst, size))
+        showUsage();
+    log('green', '...OK\n');
 }
 
 export const checkParameters = async (src, dst, size) => {
-    console.log("- Checking for file or bucket...");
-    if(! await paramsExists(src, dst)) {
-        console.log("Error either file or bucket not found");
-        console.log(USAGE)
-        process.exit(1);
-    }
+    log('yellow', '\n- Checking for file or bucket...');
+    if(! await paramsExists(src, dst))
+        showUsage();
+    log('green', '...OK\n');
 }
 
 export const syncType = (src) => {
