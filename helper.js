@@ -44,8 +44,8 @@ export const mergeManifests = (inLocalManifest, inS3Manifest) => {
     // mergedLocalManifest chunks need to be uploaded
     // mergedS3Manifest chunks need to be removed
     return {
-        mergedLocalManifest: inLocalManifest.filter(chunk => !hasSameHash(chunk, inS3Manifest)),
-        mergedS3Manifest: inS3Manifest.filter(chunk => indexOfChunk(chunk, inLocalManifest) == -1)
+        mergedLocalManifest: inLocalManifest.chunks.filter(chunk => !hasSameHash(chunk, inS3Manifest.chunks)),
+        mergedS3Manifest: inS3Manifest.chunks.filter(chunk => indexOfChunk(chunk, inLocalManifest.chunks) == -1)
     }
 }
 

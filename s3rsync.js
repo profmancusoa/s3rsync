@@ -38,16 +38,16 @@ const s3rsyncTo = async (file, bucket, size) => {
         progress.start();
 
         //chunk file and generate Manifest file
-        let localManifest = JSON.parse(await chunkFile(file, size));
-        totalChunks = localManifest.length;
+        let localManifest = JSON.parse(await chunkFile(file, size, true));
+        totalChunks = localManifest.chunks.length;
 
         //get chunk manifest from bucket        
         let s3Manifest = await getManifest(bucket, file);
-    
+        
         if(s3Manifest == null) {
-            await writeManifestChunks(bucket, localManifest);
+            await writeManifestChunks(bucket, localManifest.chunks);
             await writeObject(bucket, file2Manifest(file))
-            uploadedChunks = localManifest.length;
+            uploadedChunks = localManifest.chunks.length;
         } else {
             let {mergedLocalManifest, mergedS3Manifest} = mergeManifests(localManifest, s3Manifest)
             await writeManifestChunks(bucket, mergedLocalManifest);
@@ -70,7 +70,6 @@ const s3rsyncFrom = async (bucket, file, size) => {
     let progress = spinner(yellow('Synching chunks from S3...   '));
     let totalChunks = 0;
     let uploadedChunks = 0;
-    let chunkSize = size < MIN_CHUNK_SIZE ? MIN_CHUNK_SIZE : size;
 
     try {
         log('yellow', `\n- Start synching s3://${bucket} to file://${file}...\n\n`);
@@ -79,25 +78,26 @@ const s3rsyncFrom = async (bucket, file, size) => {
 
         //get chunk manifest from bucket        
         let s3Manifest = await getManifest(bucket, file);  
-        totalChunks = s3Manifest.length;
+        let chunkSize = s3Manifest.chunkSize;
+        totalChunks = s3Manifest.chunks.length;
         progress.start();
 
         if(!fileExists(file)) {
-            for (const chunk of s3Manifest) {
+            for (const chunk of s3Manifest.chunks) {
                 await getS3WriteLocalChunk(bucket, chunk.chunk);
             }
-            uploadedChunks = s3Manifest.length;
+            uploadedChunks = s3Manifest.chunks.length;
         } else {
             //chunk file and generate Manifest file
-            let localManifest = JSON.parse(await chunkFile(file, size));
-            for (const chunk of s3Manifest) {
-                if(!hasSameHash(chunk, localManifest)){
+            let localManifest = JSON.parse(await chunkFile(file, chunkSize, false));
+            for (const chunk of s3Manifest.chunks) {
+                if(!hasSameHash(chunk, localManifest.chunks)){
                     await getS3WriteLocalChunk(bucket, chunk.chunk);
                     uploadedChunks++;
                 }
             }
         }
-        await mergeChunks(s3Manifest.map(chunk => chunk.chunk), file);
+        await mergeChunks(s3Manifest.chunks.map(chunk => chunk.chunk), file);
         progress.stop();
         log('yellow', `\nSuccessfully synched s3://${bucket} to file://${file}\n\n`);
         log('yellow', `Downloaded ${uploadedChunks}/${totalChunks} chunks - Saved ${(totalChunks - uploadedChunks) * chunkSize} bytes\n\n`);

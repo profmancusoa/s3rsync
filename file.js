@@ -14,17 +14,20 @@ const dumpManifest = (fPath, manifest) => {
     }
 }
 
-const buildChunkManifest = async (chunkList) => {
+const buildChunkManifest = async (chunkList, chunkSize) => {
     let progress = spinner(yellow('Building chunk manifest file...   '));
-    
-    try {
-        progress.start();
-        let chunkManifest = [];
-        let destDir = chunkList[0].split('/')[0];
+    progress.start();
 
+    try {
+        let destDir = chunkList[0].split('/')[0];
+        let chunkManifest = {
+            chunkSize,
+            chunks: []
+        }
+    
         //build manifest
         chunkList.forEach(chunk => {
-            chunkManifest.push({
+            chunkManifest.chunks.push({
                 chunk: chunk, 
                 hash: md5File.sync(chunk)
             });
@@ -36,6 +39,7 @@ const buildChunkManifest = async (chunkList) => {
 
         return manifestFile;
     } catch(e) {
+        console.log(e)
         log('red', 'ERROR: Cannot generate chunk manifest...');
         return null;
     }
@@ -53,10 +57,10 @@ export const fileExists = (file) => {
     return fs.existsSync(file);
 }
 
-export const chunkFile = async (file, cs) => {
+export const chunkFile = async (file, cs, autocs) => {
     //calculate right chunkSize (min 4K)
     let fSize = fs.statSync(file).size;
-    let chunkSize = Math.max(Math.min(cs, fSize), MIN_CHUNK_SIZE);
+    let chunkSize = autocs ? Math.max(Math.min(cs, fSize), MIN_CHUNK_SIZE) : cs;
     let chunkDir = file2chunkDir(file);
     let progress = spinner(yellow('Chunking file...   '));
 
@@ -65,14 +69,13 @@ export const chunkFile = async (file, cs) => {
         log('yellow', `\n\n- Chunking file into ${chunkSize} byte chunks...\n\n`);
         progress.start();
         
-        if(!fileExists(chunkDir))
-            fs.mkdirSync(chunkDir);
+        makeDir(chunkDir);
         let chunkList = await splitFile.splitFileBySize(file, chunkSize, chunkDir);
-        
-        //build chink Manifest file
-        let manifestFile = await buildChunkManifest(chunkList);
-
         progress.stop();
+
+        //build chink Manifest file
+        let manifestFile = await buildChunkManifest(chunkList, chunkSize);
+
         return manifestFile;
     } catch(e) {
         log('red', 'ERROR: Cannot chunk file...');
