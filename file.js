@@ -2,6 +2,7 @@ import fs from 'fs';
 import splitFile from 'split-file';
 import md5File from 'md5-file';
 import { log, spinner, yellow } from './helper.js';
+import { MIN_CHUNK_SIZE}  from './.env';
 
 const dumpManifest = (fPath, manifest) => {
     try {
@@ -55,7 +56,7 @@ export const fileExists = (file) => {
 export const chunkFile = async (file, cs) => {
     //calculate right chunkSize (min 4K)
     let fSize = fs.statSync(file).size;
-    let chunkSize = Math.max(Math.min(cs, fSize), 4096);
+    let chunkSize = Math.max(Math.min(cs, fSize), MIN_CHUNK_SIZE);
     let chunkDir = file2chunkDir(file);
     let progress = spinner(yellow('Chunking file...   '));
 
@@ -69,7 +70,6 @@ export const chunkFile = async (file, cs) => {
         let chunkList = await splitFile.splitFileBySize(file, chunkSize, chunkDir);
         
         //build chink Manifest file
-        // return await buildChunkManifest(chunkList);
         let manifestFile = await buildChunkManifest(chunkList);
 
         progress.stop();

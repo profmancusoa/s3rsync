@@ -1,23 +1,25 @@
-import { fileExists } from './file.js';
-import { bucketExists } from './s3.js';
+import { fileExists, file2Manifest } from './file.js';
+import { bucketExists, objectExists } from "./s3.js";
 import { yellow, log } from './helper.js';
 import boxen from 'boxen';
 
-// const USAGE = '\nUsage: s3fsync sync -cs 1048576 file://bigFile s3://big-bucket';
 const USAGE_STR = `
-s3fsync sync -cs 1048576 file://bigFile s3://big-bucket
-\ns3fsync sync -cs 1048576 s3://big-bucket file://bigFile 
+s3rsync sync -cs 1048576 file://bigFile s3://big-bucket
+\ns3rsync sync -cs 1048576 s3://big-bucket file://bigFile 
 \nfile and bucket must exists`;
 
-const USAGE = boxen(USAGE_STR, {
-                  margin: 1,
-                  padding: 1,
-                  borderColor: "yellowBright",
-                  dimBorder: false,
-                  borderStyle: "round",
-                  title: 'Usage',
-                  titleAlignment: 'center'
-                });
+const USAGE = boxen(
+    USAGE_STR, 
+    {
+        margin: 1,
+        padding: 1,
+        borderColor: "yellowBright",
+        dimBorder: false,
+        borderStyle: "round",
+        title: 'Usage',
+        titleAlignment: 'center'
+    }
+);
 
 const paramType = (param) => {
     return param.startsWith('s3://')
@@ -40,7 +42,9 @@ const isParamsValid =  (src, dst, cs) => {
 
 const paramsExists = async (src, dst) => {
     return paramType(src) == 'bucket' 
-        ? bucketExists(paramValue(src))
+        ? ( bucketExists(paramValue(src)) &&
+            objectExists(paramValue(src), file2Manifest(paramValue(dst)))
+        )
         : ( fileExists(paramValue(src)) && 
             bucketExists(paramValue(dst))
         );
