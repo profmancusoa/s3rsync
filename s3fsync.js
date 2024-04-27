@@ -1,7 +1,7 @@
 import { VERSION } from './.env';
 import { checkParameters, validateParameters, syncType, paramValue } from './params.js';
-import { chunkFile, delChunks, file2Manifest } from './file.js';
-import { getManifest, writeObject, deleteObject } from './s3.js';
+import { chunkFile, delChunks, file2Manifest, fileExists, makeDir, mergeChunks, writeFile } from './file.js';
+import { getManifest, writeObject, deleteObject, getChunk } from './s3.js';
 import { hasSameHash, mergeManifests } from './helper.js';
 
 const s3fsyncTo = async (file, bucket, size) => {
@@ -53,7 +53,37 @@ const s3fsyncTo = async (file, bucket, size) => {
 }
 
 const s3fsyncFrom = async (bucket, file, size) => {
-    console.log("s3fsyncFrom:", bucket, file)
+    console.log("s3fsyncFrom:", bucket, file);
+    try {
+        const local_temp_path = file.concat("_chunks")
+        if(!fileExists(local_temp_path))
+            makeDir(local_temp_path);
+        if(!fileExists(file)) {
+            console.log("DOWNLOAD DIRETTO DI TUTTO");
+            const manifest = await getManifest(bucket, file);
+            for (const chunk of manifest) {
+                const chunk_bytes = await getChunk(bucket, chunk.chunk);
+                writeFile(chunk.chunk, chunk_bytes);
+            }
+            await mergeChunks(manifest.map(chunk => chunk.chunk), file);
+        } else {
+            console.log("DOWNLOAD SOLO DEI CHUNCK DIFF");
+            const local_manifest = JSON.parse(await chunkFile(file, size));
+            const bucket_manifest = await getManifest(bucket, file);
+            for (const chunk of bucket_manifest) {
+                if(!hasSameHash(chunk, local_manifest)){
+                    const chunk_bytes = await getChunk(bucket, chunk.chunk);
+                    writeFile(chunk.chunk, chunk_bytes);
+                }
+            }
+            await mergeChunks(bucket_manifest.map(chunk => chunk.chunk), file);
+        }
+    } catch (e) {
+        console.log(e)
+        console.log(`ERROR: Cannot sync s3://${bucket}/${file} to file://${file}`);
+    }finally {
+        delChunks(file);
+    }
 }
 
 const s3fsyncType = async (syncType, src, dst, size) => {

@@ -69,6 +69,10 @@ export const chunkFile = async (file, cs) => {
     }
 }
 
+export const mergeChunks = async (chunk_list, filename) => {
+    await splitFile.mergeFiles(chunk_list, filename);
+};
+
 export const delChunks = (file) => {
     try {
         fs.rmSync(file2chunkDir(file), {recursive: true});
@@ -79,4 +83,12 @@ export const delChunks = (file) => {
 
 export const readFile = (file) => {
     return fs.readFileSync(file);
+}
+
+export const writeFile = (file, bytes) => {
+    return fs.writeFileSync(file, bytes);
+};
+
+export const makeDir = (dir) => {
+    return fs.mkdirSync(dir, { recursive: true });
 }
