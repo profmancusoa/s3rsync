@@ -7,8 +7,9 @@ const client = new S3Client();
 export const bucketExists = async bucket => {
     try {
         const command = new HeadBucketCommand({ Bucket: bucket });
-        const response = await client.send(command);
-        
+        // const response = await client.send(command);
+        await client.send(command);
+
         return true;
     } catch(e) {
         return false;
@@ -29,7 +30,6 @@ const readObject = async (bucket, file) => {
 }
 
 export const writeObject = async (bucket, file) => {
-    console.log("WRITE:", bucket, file)
     let data = readFile(file);
     try {
         const command = new PutObjectCommand({
@@ -39,13 +39,12 @@ export const writeObject = async (bucket, file) => {
         });
         const response = await client.send(command);
     } catch(e) {
-        console.log("ERROR: Cannot write an object to S3");
+        log('red', 'ERROR: Cannot write an object to S3');
         process.exit(1);
     }
 }
 
 export const deleteObject = async (bucket, file) => {
-    console.log("DELETE:", bucket, file)
     try {
         const command = new DeleteObjectCommand({
             Bucket: bucket,
@@ -53,19 +52,20 @@ export const deleteObject = async (bucket, file) => {
         });
         const response = await client.send(command);
     } catch(e) {
-        console.log("ERROR: Cannot delete an object from S3");
+        log('red', 'ERROR: Cannot delete an object from S3');
         process.exit(1);
     }
 }
 
 export const getManifest = async (bucket, file) => {
-    log('yellow', '- Getting manifest file from S3\n');
+    log('yellow', '- Getting manifest file from S3...');
     try {
         let manifestFile = `${file2chunkDir(file)}/manifest.json`;
         let manifestRaw = await readObject(bucket, manifestFile);
         let manifest = JSON.parse(await manifestRaw.transformToString());
+        log('green', '...OK\n\n');
         return manifest;
-    } catch(e) {
+    } catch(e) {  
         return null;
     }
 }

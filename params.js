@@ -60,7 +60,7 @@ export const validateParameters = async (src, dst, size) => {
 }
 
 export const checkParameters = async (src, dst, size) => {
-    log('yellow', '\n- Checking for file or bucket...');
+    log('yellow', '\n- Checking for file or bucket presence...');
     if(! await paramsExists(src, dst))
         showUsage();
     log('green', '...OK\n');
