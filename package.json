@@ -1,18 +1,18 @@
 {
-  "name": "s3fsync",
-  "version": "0.1.0",
-  "description": "About",
+  "name": "s3rsync",
+  "version": "0.3.0",
+  "description": "A simple yet useful rsync alike tool for S3",
   "main": "bin/index.js",
   "type": "module",
   "bin": {
-    "s3fsync": "./bin/index.js"
+    "s3rsync": "./bin/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/profmancusoa/s3fsync.git"
+    "url": "git+https://github.com/profmancusoa/s3rsync.git"
   },
   "keywords": [
     "AWS",
@@ -20,12 +20,17 @@
     "file",
     "synch"
   ],
-  "author": "Antonio \"profmancusoa\" Mancuso",
+  "author": "Antonio \"profmancusoa\" Mancuso <profmancusoa@gmail.com> (https://github.com/profmancusoa)",
+  "contributors": [
+    {
+        "name": "Andrea Canale <vivanco11.ac@gmail.com> (https://github.com/Andrea-Canale)"
+    }
+  ],
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/profmancusoa/s3fsync/issues"
+    "url": "https://github.com/profmancusoa/s3rsync/issues"
   },
-  "homepage": "https://github.com/profmancusoa/s3fsync#readme",
+  "homepage": "https://github.com/profmancusoa/s3rsync#readme",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.556.0",
     "boxen": "^7.1.1",

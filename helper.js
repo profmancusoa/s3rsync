@@ -1,6 +1,8 @@
 import chalk from 'chalk';
 import pkg from 'clui';
 const { Spinner } = pkg;
+import { getChunk, writeObject, deleteObject } from "./s3.js";
+import { writeFile } from './file.js';
 
 export const yellow = (str) => {
     return chalk.yellowBright(str);
@@ -23,18 +25,8 @@ export const spinner = (str) => {
     ]);
     
     return spin; 
-
-    // countdown.start();
-    // var number = 3;
-    // setInterval(function () {
-    //   number--;
-    //   countdown.message(chalk.green('Uploading Chunks...  '));
-    //   if (number === 0) {
-    //     process.stdout.write('\n');
-    //     process.exit(0);
-    //   }
-    // }, 1000);
 }
+
 export const indexOfChunk = (chunk, target) => {
    return target.findIndex(item => item.chunk === chunk.chunk);
 }
@@ -56,3 +48,21 @@ export const mergeManifests = (inLocalManifest, inS3Manifest) => {
         mergedS3Manifest: inS3Manifest.filter(chunk => indexOfChunk(chunk, inLocalManifest) == -1)
     }
 }
+
+export const getS3WriteLocalChunk = async (bucket, chunk) => {
+    const chunk_bytes = await getChunk(bucket, chunk);
+    writeFile(chunk, chunk_bytes);
+}
+
+export const writeManifestChunks = async (bucket, manifest) => {
+    manifest.forEach(async chunk => {
+        await writeObject(bucket, chunk.chunk);
+    });
+}
+
+export const deleteManifestChunks = async (bucket, manifest) => {
+    manifest.forEach(async chunk => {
+        await deleteObject(bucket, chunk.chunk);
+    });
+}
+            

@@ -1,5 +1,5 @@
 import { program } from 'commander';
-import { s3fsync } from './s3fsync.js';
+import { s3rsync } from './s3rsync.js';
 import { VERSION } from './.env';
 
 export const main = async () => {
@@ -10,7 +10,7 @@ export const main = async () => {
         .description('smart sync of file:// | s3:// source to file:// | s3:// destination')
         .requiredOption('-cs, --chunk-size <bytes>', 'chunk size in bytes')
         .action((source, destination, options) => {
-            s3fsync(source, destination, options.chunkSize);
+            s3rsync(source, destination, options.chunkSize);
         })
         .showHelpAfterError();
 
