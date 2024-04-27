@@ -69,3 +69,12 @@ export const getManifest = async (bucket, file) => {
         return null;
     }
 }
+
+export const getChunk = async (bucket, chunk) => {
+    try {
+        const raw_chunk = await readObject(bucket, chunk);
+        return await raw_chunk.transformToByteArray();
+    } catch(e) {
+        return null;
+    }
+}
