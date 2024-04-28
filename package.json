@@ -1,11 +1,11 @@
 {
-  "name": "s3rsync",
+  "name": "@profmancusoa/s3rsync",
   "version": "1.0.0",
   "description": "A simple yet useful rsync alike tool for S3",
   "main": "bin/index.js",
   "type": "module",
   "bin": {
-    "s3rsync": "./bin/index.js"
+    "s3rsync": "bin/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -28,7 +28,7 @@
   "author": "Antonio \"profmancusoa\" Mancuso <profmancusoa@gmail.com> (https://github.com/profmancusoa)",
   "contributors": [
     {
-        "name": "Andrea Canale <vivanco11.ac@gmail.com> (https://github.com/Andrea-Canale)"
+      "name": "Andrea Canale <vivanco11.ac@gmail.com> (https://github.com/Andrea-Canale)"
     }
   ],
   "license": "GPL-3.0-or-later",
