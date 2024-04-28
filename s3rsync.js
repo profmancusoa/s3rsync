@@ -115,6 +115,8 @@ const s3rsyncType = async (syncType, src, dst, size) => {
 } 
 
 export const s3rsync = async (src, dst, size) => {
+    if(!size)
+        size = MIN_CHUNK_SIZE;
     try {
         log('yellow',
             boxen(yellow(VERSION), {

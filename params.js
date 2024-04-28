@@ -5,7 +5,7 @@ import boxen from 'boxen';
 
 const USAGE_STR = `
 s3rsync sync -cs 1048576 file://bigFile s3://big-bucket
-\ns3rsync sync -cs 1048576 s3://big-bucket file://bigFile 
+\ns3rsync sync s3://big-bucket file://bigFile 
 \nfile and bucket must exists`;
 
 const USAGE = boxen(
