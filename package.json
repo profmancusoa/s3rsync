@@ -1,6 +1,6 @@
 {
   "name": "s3rsync",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "A simple yet useful rsync alike tool for S3",
   "main": "bin/index.js",
   "type": "module",
@@ -17,8 +17,13 @@
   "keywords": [
     "AWS",
     "S3",
-    "file",
-    "synch"
+    "s3-sync",
+    "sync",
+    "file-sync",
+    "s3-file-sync",
+    "aws-cli-sync",
+    "aws-sync-cli",
+    "aws-s3-sync"
   ],
   "author": "Antonio \"profmancusoa\" Mancuso <profmancusoa@gmail.com> (https://github.com/profmancusoa)",
   "contributors": [
