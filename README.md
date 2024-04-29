@@ -24,7 +24,7 @@ The main goals of **s3rsync** are:
 The installation is extremely simple via npm (I have only teste don Linux and MacOS).
 
 ```bash
-npm install -g s3rsync
+npm install -g @profmancusoa/s3rsync
 ```
 
 ## Configuration
