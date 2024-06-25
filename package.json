@@ -1,6 +1,6 @@
 {
   "name": "@profmancusoa/s3rsync",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A simple yet useful rsync alike tool for S3",
   "main": "bin/index.js",
   "type": "module",
