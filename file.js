@@ -1,15 +1,36 @@
 import fs from 'fs';
+import readline from 'readline';
 import splitFile from 'split-file';
 import md5File from 'md5-file';
 import { log, spinner, yellow } from './helper.js';
-import { MIN_CHUNK_SIZE}  from './.env';
+import { MIN_CHUNK_SIZE } from './.env';
+
+const checkFolderAndPrompt = (dirname) => {
+    if (fs.existsSync(dirname) && dirname.endsWith('_chunks')) {
+        log('yellow', '\n\n- Chunks found, skipping rechunking and proceeding to sync...\n\n');
+        return false;
+    } else {
+        log('yellow', '\n\n- Folder does not exist or does not end with "_chunks".\n\n');
+        return true;
+    }
+}
 
 const dumpManifest = (fPath, manifest) => {
     try {
         fs.writeFileSync(fPath, JSON.stringify(manifest, null, 2));
         return JSON.stringify(manifest, null, 2);
-    } catch(e) {
-        log('red', 'ERROR: Cannot write chunk manifest...');
+    } catch (e) {
+        log('red', '\nERROR: Cannot write chunk manifest...\n\n');
+        return null;
+    }
+}
+
+const loadManifest = (fPath) => {
+    try {
+        const data = fs.readFileSync(fPath, 'utf8');
+        return data;
+    } catch (e) {
+        log('red', '\nERROR: Cannot read or parse chunk manifest...\n\n');
         return null;
     }
 }
@@ -24,23 +45,23 @@ const buildChunkManifest = async (chunkList, chunkSize) => {
             chunkSize,
             chunks: []
         }
-    
+
         //build manifest
         chunkList.forEach(chunk => {
             chunkManifest.chunks.push({
-                chunk: chunk, 
+                chunk: chunk,
                 hash: md5File.sync(chunk)
             });
         });
-        
+
         //dump manifest
-        let manifestFile = dumpManifest(`${destDir}/manifest.json`, chunkManifest); 
+        let manifestFile = dumpManifest(`${destDir}/manifest.json`, chunkManifest);
         progress.stop();
 
         return manifestFile;
-    } catch(e) {
+    } catch (e) {
         console.log(e)
-        log('red', 'ERROR: Cannot generate chunk manifest...');
+        log('red', '\nERROR: Cannot generate chunk manifest...');
         return null;
     }
 }
@@ -62,13 +83,16 @@ export const chunkFile = async (file, cs, autocs) => {
     let fSize = fs.statSync(file).size;
     let chunkSize = autocs ? Math.max(Math.min(cs, fSize), MIN_CHUNK_SIZE) : cs;
     let chunkDir = file2chunkDir(file);
+    let manifestDir = file2Manifest(file);
     let progress = spinner(yellow('Chunking file...   '));
-
+    if (!checkFolderAndPrompt(chunkDir)) { 
+        return loadManifest(manifestDir);
+    }
     try {
         //create chinks dir and chink file
         log('yellow', `\n\n- Chunking file into ${chunkSize} byte chunks...\n\n`);
         progress.start();
-        
+
         makeDir(chunkDir);
         let chunkList = await splitFile.splitFileBySize(file, chunkSize, chunkDir);
         progress.stop();

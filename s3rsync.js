@@ -45,10 +45,13 @@ const s3rsyncTo = async (file, bucket, size) => {
         let s3Manifest = await getManifest(bucket, file);
         
         if(s3Manifest == null) {
+            log('yellow', '\n\tS3 does not seem to contain a chunk memory, uploading for the first time...')
             await writeManifestChunks(bucket, localManifest.chunks);
+            log('yellow', "\nManifest Chunks Written\n")
             await writeObject(bucket, file2Manifest(file))
             uploadedChunks = localManifest.chunks.length;
         } else {
+            log('yellow', '\nS3 seems to contain a chunk memory, uploading...')
             let {mergedLocalManifest, mergedS3Manifest} = mergeManifests(localManifest, s3Manifest)
             await writeManifestChunks(bucket, mergedLocalManifest);
             await deleteManifestChunks(bucket, mergedS3Manifest);
@@ -59,7 +62,7 @@ const s3rsyncTo = async (file, bucket, size) => {
         log('yellow', `\nSuccessfully synched file://${file} to s3://${bucket}\n\n`);
         log('yellow', `Uploaded ${uploadedChunks}/${totalChunks} chunks - Saved ${(totalChunks - uploadedChunks) * chunkSize} bytes\n\n`);
     } catch(e) {
-        log('red', `ERROR: Cannot sync file://${file} to s3://${bucket}`);
+        log('red', `\n ERROR: Cannot sync file://${file} to s3://${bucket} due to ${e} \n\n`);
     } finally {
         //cleanup
         delChunks(file);
@@ -102,7 +105,7 @@ const s3rsyncFrom = async (bucket, file, size) => {
         log('yellow', `\nSuccessfully synched s3://${bucket} to file://${file}\n\n`);
         log('yellow', `Downloaded ${uploadedChunks}/${totalChunks} chunks - Saved ${(totalChunks - uploadedChunks) * chunkSize} bytes\n\n`);
     } catch (e) {
-        log('red', `ERROR: Cannot sync s3://${bucket}/${file} to file://${file}`);
+        log('red', `\nERROR: Cannot sync s3://${bucket}/${file} to file://${file} due to ${e} \n`);
     }finally {
         delChunks(file);
     }

@@ -69,8 +69,8 @@ export const writeObject = async (bucket, file) => {
     });
     const response = await client.send(command);
   } catch (e) {
-    log("red", "ERROR: Cannot write an object to S3");
-    process.exit(1);
+    log("red", "ERROR: Cannot write an object to S3, retrying...");
+    writeObject(bucket, file);
   }
 };
 

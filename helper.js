@@ -54,10 +54,20 @@ export const getS3WriteLocalChunk = async (bucket, chunk) => {
     writeFile(chunk, chunk_bytes);
 }
 
+// export const writeManifestChunks = (bucket, manifest) => {
+//     manifest.forEach(async chunk => {
+//         log('blue', `Chunk: ${chunk.chunk}\n`);
+//         await writeObject(bucket, chunk.chunk);
+//         log('blue', `${chunk.chunk} DONE\n`);
+//     });
+// }
+
 export const writeManifestChunks = async (bucket, manifest) => {
-    manifest.forEach(async chunk => {
+    for (let chunk of manifest){
+        log('blue', `Chunk: ${chunk.chunk}\n`);
         await writeObject(bucket, chunk.chunk);
-    });
+        log('blue', `${chunk.chunk} DONE\n`);
+    }
 }
 
 // export const writeManifestChunks = async (bucket, manifest) => {
